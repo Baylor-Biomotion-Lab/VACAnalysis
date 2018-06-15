@@ -1,16 +1,26 @@
 function [ CategorizedNames, SubNo, TrialNo, categories,activities ] = NameMiner( contents )
-% Uses Jenny's naming convention and finds the category, activity, subject
-% and trial number for each trial.
-
+%NameMiner finds categorical information for a trial name.  
+%
 % Input can either be a directory of names EX:
 % contents=dir('*.mat')
 % Or input can be a single name or cell with names EX:
 % contents='R_Subj1_BF_335_TR03.mat'
-
-
+%
+% Category and activity will be held in cells, so to access you would need
+% to do categories{1} for an individual trial. 
+%
 % If we are using a directory of names, we want to get the categories and
 % activities. Otherwise, we want the SubNo and TrialNo
+%
+% [ CategorizedNames, SubNo, TrialNo, categories,activities ] = NameMiner( 'R_Subj1_BF_335_TR03.mat' )
+% CategorizedNames will return a table containing all information
+% SubNo will be 1
+% Trial number will be 3
+% Activity is 335 (code for running in this study)
+% Category will be BF (barefoot in this study)
+
 SubNo=1;
+% Check if contents are a structure (directory) or not.
 if isstruct(contents)
     namesL=length(contents);
     names=cell(namesL,1);
@@ -23,16 +33,20 @@ else
     names=contents;
 end
 CategorizedNames=cell(namesL,5);
-
+% Loop through each name and find its information
 for name=1:namesL
     str=names{name};
-    
+    % These should all be .mat files
     if ~strcmp(str(end-4:end),'.mat')
         str=sprintf('%s.mat',str);
     end
+    % The file names are separated by an '_' between each relevant piece of
+    % information. 
+    % First we will break the name up by these.
     expression='(\w+)_(\w+)_(\w+)_(\w+)_(\w+).mat';
     tokens=regexp(str,expression,'tokens');
-    
+    % Now we just need to go through each 'token'. The file should always 
+    % be named in a specific order. 
     subStr=tokens{1}{2};
     subExp='(\d+)';
     Sub=regexp(subStr,subExp,'tokens');
